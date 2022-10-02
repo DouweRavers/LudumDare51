@@ -18,6 +18,7 @@ public class MovePart : MonoBehaviour
 
     void Move(Vector3 dir)
     {
+        transform.LookAt(transform.position + dir);
         if (Physics.Raycast(transform.position + Vector3.up * 0.5f, dir, 5)) return;
 
         StartCoroutine(MoveCoroutine());
@@ -27,7 +28,6 @@ public class MovePart : MonoBehaviour
             var stepTime = LevelManager.Instance.TickDuration / steps;
             var originalPos = transform.position;
             var destinationPos = transform.position + dir;
-            transform.LookAt(destinationPos);
             GetComponent<Animator>().SetBool("Driving", true);
             for (int i = 1; i <= (int)steps; i++)
             {

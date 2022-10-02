@@ -21,6 +21,10 @@ public class LevelManager : MonoBehaviour
     RobotManager _activeRobot;
     [SerializeField]
     PositionMarker[] _positionMarkers;
+    [SerializeField]
+    Transform _wheatField;
+    [SerializeField]
+    Transform _bridge;
 
     bool _won = false;
 
@@ -69,12 +73,19 @@ public class LevelManager : MonoBehaviour
 
     public void ResetLevel()
     {
+        _won = false;
         RunningDuration = 0;
         _activeRobot.transform.position = Vector3.zero;
         _activeRobot.transform.eulerAngles = Vector3.zero;
         CodeManager.Instance.ResetMemory();
         CodeManager.Instance.CompileCode();
         foreach (var marker in _positionMarkers) marker.Checked = false;
+        ResetWheatField();
+        if (_bridge != null)
+        {
+            if (_bridge.TryGetComponent(out Collider collider)) collider.enabled = true;
+            _bridge.GetChild(0).eulerAngles = new Vector3(-90, 0, 0);
+        }
     }
 
     void Run()
@@ -107,6 +118,7 @@ public class LevelManager : MonoBehaviour
     {
         if (_level == 1) return CheckChallengesLevel1();
         if (_level == 2) return CheckChallengesLevel2();
+        if (_level == 3) return CheckChallengesLevel3();
         return new bool[0];
     }
 
@@ -154,5 +166,36 @@ public class LevelManager : MonoBehaviour
         }
         return challenges;
     }
+
+    public bool[] CheckChallengesLevel3()
+    {
+        bool[] challenges = new bool[3] { false, false, false };
+
+        challenges[0] = 2 < CodeManager.Instance.Memory[4];
+        challenges[1] = !_bridge.GetComponent<Collider>().enabled;
+        challenges[2] = _positionMarkers[0].Checked;
+
+        if (!_won && challenges.Where(c => !c).ToArray().Length == 0)
+        {
+            _won = true;
+            if (SceneManager.Instance.LastUnlockedLevel < _level)
+                SceneManager.Instance.LastUnlockedLevel = _level;
+            OnFinished.Invoke();
+        }
+        return challenges;
+    }
     #endregion
+
+    void ResetWheatField()
+    {
+        if (_wheatField == null) return;
+        for (int i = 0; i < _wheatField.childCount; i++)
+        {
+            var child = _wheatField.GetChild(i);
+            child.localScale = Vector3.one;
+            if (child.TryGetComponent(out Collider collider)) collider.enabled = true;
+            var renderer = child.GetComponentInChildren<SpriteRenderer>();
+            if (renderer != null) renderer.enabled = true;
+        }
+    }
 }

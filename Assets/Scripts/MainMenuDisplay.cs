@@ -7,7 +7,7 @@ public class MainMenuDisplay : MonoBehaviour
     GameObject greeting;
 
     [SerializeField]
-    Button _level1, _level2, _level3, _level4;
+    Button _level1, _level2, _level3;
 
     private void Start()
     {
@@ -18,25 +18,17 @@ public class MainMenuDisplay : MonoBehaviour
                 _level1.interactable = true;
                 _level2.interactable = false;
                 _level3.interactable = false;
-                _level4.interactable = false;
                 break;
             case 1:
                 _level1.interactable = true;
                 _level2.interactable = true;
                 _level3.interactable = false;
-                _level4.interactable = false;
                 break;
+            default:
             case 2:
                 _level1.interactable = true;
                 _level2.interactable = true;
                 _level3.interactable = true;
-                _level4.interactable = false;
-                break;
-            case 3:
-                _level1.interactable = true;
-                _level2.interactable = true;
-                _level3.interactable = true;
-                _level4.interactable = true;
                 break;
         }
     }
