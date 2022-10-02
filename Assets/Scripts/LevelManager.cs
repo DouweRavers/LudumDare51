@@ -7,18 +7,22 @@ public class LevelManager : MonoBehaviour
 {
     [SerializeField] int _level;
 
-    const float c_normalSpeedTickDuration = 0.25f;
+    const float c_normalSpeedTickDuration = 0.3f;
     const float c_slowSpeedTickDuration = 1f;
 
     public static LevelManager Instance { get; private set; }
     public bool[] Challenges { get { return CheckChallenges(); } }
     public float RunningDuration { get; private set; }
-    public float TickDuration = 0.5f;
+    public float TickDuration = 0.3f;
 
     public UnityEvent OnFinished, OnTimeOver;
 
     [SerializeField]
     RobotManager _activeRobot;
+    [SerializeField]
+    PositionMarker[] _positionMarkers;
+
+    bool _won = false;
 
     void Awake()
     {
@@ -26,6 +30,9 @@ public class LevelManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
+    public void ResetDuration() { RunningDuration = 0f; }
+
+    #region Controls
     public void RunNormal()
     {
         TickDuration = c_normalSpeedTickDuration;
@@ -38,14 +45,42 @@ public class LevelManager : MonoBehaviour
         Run();
     }
 
-    void Run()
+    public void Tick()
     {
-        _activeRobot.transform.position = Vector3.zero;
-        _activeRobot.transform.eulerAngles = Vector3.zero;
-        CodeManager.Instance.Reset();
+        TickDuration = c_slowSpeedTickDuration;
         CodeManager.Instance.CompileCode();
         if (CodeManager.Instance.ErrorLine != -1) return;
+        if (CodeManager.Instance.Commands.Length == CodeManager.Instance.Line)
+        {
+            ResetLevel();
+            return;
+        }
+        if (CodeManager.Instance.Commands.Length == 0) return;
+        CodeManager.Instance.RunCommand();
+        _activeRobot.Tick();
+        RunningDuration += c_normalSpeedTickDuration;
+    }
 
+    public void Stop()
+    {
+        StopAllCoroutines();
+        ResetLevel();
+    }
+
+    public void ResetLevel()
+    {
+        RunningDuration = 0;
+        _activeRobot.transform.position = Vector3.zero;
+        _activeRobot.transform.eulerAngles = Vector3.zero;
+        CodeManager.Instance.ResetMemory();
+        CodeManager.Instance.CompileCode();
+        foreach (var marker in _positionMarkers) marker.Checked = false;
+    }
+
+    void Run()
+    {
+        ResetLevel();
+        if (CodeManager.Instance.ErrorLine != -1) return;
         StartCoroutine(runCode());
         IEnumerator runCode()
         {
@@ -57,6 +92,7 @@ public class LevelManager : MonoBehaviour
                     OnTimeOver.Invoke();
                     break;
                 }
+                if (_won) { break; }
                 yield return new WaitForSeconds(TickDuration);
                 RunningDuration += c_normalSpeedTickDuration;
                 interate = CodeManager.Instance.RunCommand();
@@ -64,33 +100,13 @@ public class LevelManager : MonoBehaviour
             }
         }
     }
-
-    public void Tick()
-    {
-        TickDuration = c_slowSpeedTickDuration;
-        CodeManager.Instance.CompileCode();
-        if (CodeManager.Instance.ErrorLine != -1) return;
-        if (CodeManager.Instance.Commands.Length == 0) return;
-        bool endProgram = CodeManager.Instance.RunCommand();
-        _activeRobot.Tick();
-        RunningDuration += c_normalSpeedTickDuration;
-
-        if (!endProgram) Stop();
-    }
-
-    public void Stop()
-    {
-        RunningDuration = 0;
-        StopAllCoroutines();
-        _activeRobot.transform.position = Vector3.zero;
-        _activeRobot.transform.eulerAngles = Vector3.zero;
-        CodeManager.Instance.Reset();
-    }
+    #endregion
 
     #region Challenges
     bool[] CheckChallenges()
     {
         if (_level == 1) return CheckChallengesLevel1();
+        if (_level == 2) return CheckChallengesLevel2();
         return new bool[0];
     }
 
@@ -109,7 +125,33 @@ public class LevelManager : MonoBehaviour
 
         challenges[2] = CodeManager.Instance.Commands.Length > 0 &&
             CodeManager.Instance.Commands.Where((c) => c.Type == CommandType.SKIP).ToArray().Length > 0;
-        if (challenges.Where(c => !c).ToArray().Length == 0) OnFinished.Invoke();
+
+        if (!_won && challenges.Where(c => !c).ToArray().Length == 0)
+        {
+            _won = true;
+            if (SceneManager.Instance.LastUnlockedLevel < _level)
+                SceneManager.Instance.LastUnlockedLevel = _level;
+            OnFinished.Invoke();
+        }
+        return challenges;
+    }
+
+    public bool[] CheckChallengesLevel2()
+    {
+        bool[] challenges = new bool[3];
+        challenges[0] = _positionMarkers[0].Checked;
+
+        challenges[1] = _positionMarkers[1].Checked;
+
+        challenges[2] = _positionMarkers[2].Checked;
+
+        if (!_won && challenges.Where(c => !c).ToArray().Length == 0)
+        {
+            _won = true;
+            if (SceneManager.Instance.LastUnlockedLevel < _level)
+                SceneManager.Instance.LastUnlockedLevel = _level;
+            OnFinished.Invoke();
+        }
         return challenges;
     }
     #endregion

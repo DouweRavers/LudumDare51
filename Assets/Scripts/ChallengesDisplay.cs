@@ -21,4 +21,9 @@ public class ChallengesDisplay : MonoBehaviour
         }
         overview.text = text;
     }
+
+    public void LoadMainMenu()
+    {
+        SceneManager.Instance.LoadMainMenu();
+    }
 }

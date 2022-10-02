@@ -4,24 +4,24 @@ using UnityEngine;
 public class CodeDisplay : MonoBehaviour
 {
     [SerializeField]
-    TextMeshProUGUI _memoryText, _lineNumberText, _codeText;
+    TextMeshProUGUI _lineNumberText;
+    [SerializeField]
+    Transform _memory;
 
     void Update()
     {
-        //if (Time.frameCount % 10 != 0) return;
         UpdateMemory();
         UpdateLineNumbers();
-        //UpdateCode();
     }
 
     void UpdateMemory()
     {
-        string text = "Memory:\n\n";
-        for (int i = 0; i < CodeManager.Instance.Memory.Length; i++)
+        for (int i = 0; i < _memory.childCount; i++)
         {
-            text += $"#{i}: {CodeManager.Instance.Memory[i]}\n";
+            var textGUIs = _memory.GetChild(i).GetComponentsInChildren<TextMeshProUGUI>();
+            textGUIs[0].text = "#" + i;
+            textGUIs[1].text = "" + CodeManager.Instance.Memory[i];
         }
-        _memoryText.text = text;
     }
 
     void UpdateLineNumbers()
@@ -35,25 +35,5 @@ public class CodeDisplay : MonoBehaviour
             if (CodeManager.Instance.Line == i || CodeManager.Instance.ErrorLine == i) text += "<color=grey>";
         }
         _lineNumberText.text = text;
-    }
-
-    void UpdateCode()
-    {
-        string text = _codeText.text;
-        int lineStart = text.IndexOf('\n') + 1;
-        int lineEnd = text.IndexOf('\n', lineStart);
-        int lineNumber = 0;
-        while (lineEnd != -1)
-        {
-            if (CodeManager.Instance.Line == lineNumber) text.Insert(lineStart, "<color=green>");
-            if (CodeManager.Instance.ErrorLine == lineNumber) text.Insert(lineStart, "<color=red>");
-            if (CodeManager.Instance.Line == lineNumber || CodeManager.Instance.ErrorLine == lineNumber)
-                text.Insert(lineStart, "<color=white>");
-
-            lineStart = text.IndexOf('\n') + 1;
-            lineEnd = text.IndexOf('\n', lineStart);
-            lineNumber++;
-        }
-        _codeText.text = text;
     }
 }

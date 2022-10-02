@@ -55,6 +55,7 @@ public class CodeManager : MonoBehaviour
 
     public bool RunCommand()
     {
+        if (Line < 0 || Commands.Length <= Line) return false;
         var command = Commands[Line];
         Line++;
 
@@ -123,7 +124,7 @@ public class CodeManager : MonoBehaviour
         Commands = commandsList.ToArray();
     }
 
-    public void Reset()
+    public void ResetMemory()
     {
         Memory = new int[16];
         Line = 0;

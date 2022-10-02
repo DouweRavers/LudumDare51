@@ -23,7 +23,7 @@ public class MovePart : MonoBehaviour
         StartCoroutine(MoveCoroutine());
         IEnumerator MoveCoroutine()
         {
-            var steps = 30 * LevelManager.Instance.TickDuration;
+            var steps = 60;
             var stepTime = LevelManager.Instance.TickDuration / steps;
             var originalPos = transform.position;
             var destinationPos = transform.position + dir;
