@@ -4,6 +4,11 @@ public class CutPart : MonoBehaviour
 {
     [SerializeField]
     AudioSource _cutSound;
+    public void ResetPart()
+    {
+        CodeManager.Instance.Memory[4] = 0;
+    }
+
     public void Tick()
     {
         if (CodeManager.Instance.Memory[3] == 0) return;

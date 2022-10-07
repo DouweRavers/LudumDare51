@@ -3,6 +3,13 @@ using UnityEngine;
 
 public class RobotManager : MonoBehaviour
 {
+    public void ResetRobot()
+    {
+        if (TryGetComponent(out MovePart movePart)) movePart.ResetPart();
+        if (TryGetComponent(out DetectPart detectPart)) detectPart.ResetPart();
+        if (TryGetComponent(out CutPart cutPart)) cutPart.ResetPart();
+        if (TryGetComponent(out InterfacePart interfacePart)) interfacePart.ResetPart();
+    }
 
     public void Tick()
     {

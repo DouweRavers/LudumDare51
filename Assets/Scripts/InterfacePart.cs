@@ -4,6 +4,13 @@ public class InterfacePart : MonoBehaviour
 {
     bool _communicationStarted = false;
     int _myCode = -1;
+
+    public void ResetPart()
+    {
+        _communicationStarted = false;
+        _myCode = -1;
+    }
+
     public void Tick()
     {
         if (Physics.Raycast(transform.position + Vector3.up * 0.5f, transform.forward * 5, out RaycastHit hit, 5))
@@ -24,7 +31,7 @@ public class InterfacePart : MonoBehaviour
                 }
                 else
                 {
-                    if (CodeManager.Instance.Memory[6] == (_myCode * 51) / 50 + 49)
+                    if (CodeManager.Instance.Memory[6] == (_myCode * 13) / 2 + 98)
                     {
                         CodeManager.Instance.Memory[5] = 0;
                         hit.collider.GetComponent<Animation>().Play();
@@ -33,10 +40,6 @@ public class InterfacePart : MonoBehaviour
                 }
             }
         }
-        else
-        {
-            _communicationStarted = false;
-            _myCode = -1;
-        }
+        else ResetPart();
     }
 }

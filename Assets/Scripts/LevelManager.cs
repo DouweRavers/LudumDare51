@@ -51,18 +51,21 @@ public class LevelManager : MonoBehaviour
 
     public void Tick()
     {
-        TickDuration = c_slowSpeedTickDuration;
         CodeManager.Instance.CompileCode();
         if (CodeManager.Instance.ErrorLine != -1) return;
-        if (CodeManager.Instance.Commands.Length == CodeManager.Instance.Line)
+        if (CodeManager.Instance.Commands.Length == CodeManager.Instance.Line) { _activeRobot.Tick(); return; }
+        if (CodeManager.Instance.Commands.Length + 1 == CodeManager.Instance.Line)
         {
             ResetLevel();
             return;
         }
         if (CodeManager.Instance.Commands.Length == 0) return;
+
+        TickDuration = c_slowSpeedTickDuration;
+        RunningDuration += c_normalSpeedTickDuration;
+
         CodeManager.Instance.RunCommand();
         _activeRobot.Tick();
-        RunningDuration += c_normalSpeedTickDuration;
     }
 
     public void Stop()
@@ -77,6 +80,7 @@ public class LevelManager : MonoBehaviour
         RunningDuration = 0;
         _activeRobot.transform.position = Vector3.zero;
         _activeRobot.transform.eulerAngles = Vector3.zero;
+        _activeRobot.ResetRobot();
         CodeManager.Instance.ResetMemory();
         CodeManager.Instance.CompileCode();
         foreach (var marker in _positionMarkers) marker.Checked = false;
@@ -104,8 +108,10 @@ public class LevelManager : MonoBehaviour
                     break;
                 }
                 if (_won) { break; }
+
                 yield return new WaitForSeconds(TickDuration);
                 RunningDuration += c_normalSpeedTickDuration;
+
                 interate = CodeManager.Instance.RunCommand();
                 _activeRobot.Tick();
             }
