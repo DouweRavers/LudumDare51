@@ -6,15 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MainMenu.unity
+    path: Assets/Cobor/Scenes/MainMenu.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Scenes/Level 1.unity
+    path: Assets/Cobor/Scenes/Level 1.unity
     guid: 25e92cf240909f94f92bbe39ab6a2ce5
   - enabled: 1
-    path: Assets/Scenes/Level 2.unity
+    path: Assets/Cobor/Scenes/Level 2.unity
     guid: 0a94f05538964d0478624ad4873d6f1e
   - enabled: 1
-    path: Assets/Scenes/Level 3.unity
+    path: Assets/Cobor/Scenes/Level 3.unity
     guid: d03210b3db75e49429e22fd4b983fd63
   m_configObjects: {}
